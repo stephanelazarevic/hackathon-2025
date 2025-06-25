@@ -110,16 +110,13 @@ export default function AIAssistant() {
         }
       }
 
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
-        console.log('Requête annulée');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error('Erreur lors de la requête:', err.message);
       } else {
-        console.error('Erreur lors de la requête:', err);
-        setMessages(prevMessages => [...prevMessages.slice(0, -1), { 
-          role: 'assistant', 
-          content: 'Erreur lors de la requête au serveur.' 
-        }]);
+        console.error('Erreur inconnue:', err);
       }
+
       setLoading(false);
       setIsStreaming(false);
     }

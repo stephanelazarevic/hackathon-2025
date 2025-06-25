@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eventAgent } from '@/app/agent/myAgent';
 
-type Message = {
-  role: 'user' | 'assistant';
-  content: string;
-};
-
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
