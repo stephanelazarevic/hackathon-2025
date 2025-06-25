@@ -18,6 +18,8 @@ interface StepFormData {
   priority: string;
 }
 
+export type { StepFormData };
+
 interface StepFormProps {
   onComplete: (data: StepFormData) => void;
   onBack: () => void;

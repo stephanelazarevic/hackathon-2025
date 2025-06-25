@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import FormCard from './FormCard';
-import FormInput from './FormInput';
+import FormCard from '../../components/FormCard';
+import FormInput from '../../components/FormInput';
 
 interface EventFormData {
   projectType: string;

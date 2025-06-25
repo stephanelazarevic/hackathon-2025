@@ -4,14 +4,10 @@ import { useState } from 'react';
 import ChatBubble from './ChatBubble';
 import ChatInput from './ChatInput';
 import StepForm from './StepForm';
+import EventSummary, { EventSummaryData } from './EventSummary';
+import { Conversation, Message } from '../hooks/useConversations';
 
-interface Message {
-  id: number;
-  text: string;
-  isAI: boolean;
-}
-
-interface StepFormData {
+export interface StepFormData {
   eventType: string;
   projectType: string;
   guests: number;
@@ -25,36 +21,27 @@ interface StepFormData {
   age: number;
 }
 
-export default function ChatContainer() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: "Bonjour ! Je suis Evently-AI, votre assistant IA pour l'organisation d'événements. Comment puis-je vous aider à créer un événement extraordinaire aujourd'hui ?",
-      isAI: true,
-    },
-  ]);
-  
+interface ChatContainerProps {
+  conversation: Conversation;
+  onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
+}
+
+export default function ChatContainer({ conversation, onAddMessage }: ChatContainerProps) {
   const [showForm, setShowForm] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [eventData, setEventData] = useState<EventSummaryData | null>(null);
   const [isTyping, setIsTyping] = useState(false);
 
   const handleSendMessage = (messageText: string) => {
-    const newMessage: Message = {
-      id: messages.length + 1,
-      text: messageText,
-      isAI: false,
-    };
-
-    setMessages(prev => [...prev, newMessage]);
+    // Ajouter le message utilisateur
+    onAddMessage({ text: messageText, isAI: false });
     setIsTyping(true);
 
     // Simuler une réponse de l'IA et afficher le formulaire
     setTimeout(() => {
-      const aiResponse: Message = {
-        id: messages.length + 2,
-        text: "Parfait ! Pour vous proposer les meilleures options, j'ai besoin de quelques informations sur votre projet. Pourriez-vous remplir ce petit formulaire ?",
-        isAI: true,
-      };
-      setMessages(prev => [...prev, aiResponse]);
+      const aiResponseText = "Parfait ! Pour vous proposer les meilleures options, j'ai besoin de quelques informations sur votre projet. Pourriez-vous remplir ce petit formulaire ?";
+      
+      onAddMessage({ text: aiResponseText, isAI: true });
       setIsTyping(false);
       
       // Afficher le formulaire après la réponse
@@ -66,20 +53,39 @@ export default function ChatContainer() {
     // Traitement des données du formulaire
     console.log('Données du formulaire:', formData);
     
-    // Ajouter un message de confirmation plus détaillé
-    const confirmationMessage: Message = {
-      id: messages.length + 3,
-      text: `Parfait ! J'ai bien reçu toutes vos informations. Vous souhaitez organiser un ${formData.eventType} ${formData.projectType} pour ${formData.guests} personnes avec un budget de ${formData.budget}€. Le thème sera ${formData.theme} avec une ambiance ${formData.atmosphere}. Je vais maintenant vous proposer un plan détaillé personnalisé pour votre événement !`,
-      isAI: true,
+    // Ajouter un message de confirmation détaillé
+    const confirmationText = `Parfait ! J'ai bien reçu toutes vos informations. Vous souhaitez organiser un ${formData.eventType} ${formData.projectType} pour ${formData.guests} personnes avec un budget de ${formData.budget}€. Le thème sera ${formData.theme} avec une ambiance ${formData.atmosphere}. Je vais maintenant générer votre plan détaillé personnalisé !`;
+    
+    onAddMessage({ text: confirmationText, isAI: true });
+    setShowForm(false);
+    
+    // Créer les données du résumé avec des recommandations
+    const summaryData: EventSummaryData = {
+      ...formData,
+      generatedAt: new Date().toISOString()
     };
     
-    setMessages(prev => [...prev, confirmationMessage]);
-    setShowForm(false);
+    setEventData(summaryData);
+    
+    // Afficher le résumé après un court délai
+    setTimeout(() => {
+      setShowSummary(true);
+    }, 2000);
   };
-
   const handleBackToChat = () => {
     setShowForm(false);
+    setShowSummary(false);
   };
+
+  if (showSummary && eventData) {
+    return (
+      <EventSummary 
+        data={eventData}
+        onBackToChat={handleBackToChat}
+      />
+    );
+  }
+
   if (showForm) {
     return (
       <StepForm 
@@ -91,9 +97,8 @@ export default function ChatContainer() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* Chat Messages Area */}
-      <div className="bg-[var(--card-bg)] backdrop-blur-md border border-[var(--chat-input-border)] rounded-xl p-6 mb-6 min-h-[400px] max-h-[600px] overflow-y-auto">
-        {messages.map((message) => (
+      {/* Chat Messages Area */}      <div className="bg-[var(--card-bg)] backdrop-blur-md border border-[var(--chat-input-border)] rounded-xl p-6 mb-6 min-h-[400px] max-h-[600px] overflow-y-auto">
+        {conversation.messages.map((message) => (
           <ChatBubble
             key={message.id}
             message={message.text}
