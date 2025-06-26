@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Service MongoDB
+  mongodb:
+    image: mongo:6.0
+    container_name: ervia_db
+    restart: always
+    ports:
+      - "27017:27017"
+    env_file:
+      - .env
+    volumes:
+      - mongodb_data:/data/db
+      - ./back/src/api/docs:/api_docs
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - ervia_network
+
+  # Service NestJS
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: ervia_back
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - ervia_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  ervia_network:
+    driver: bridge
