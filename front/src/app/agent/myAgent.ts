@@ -3,15 +3,23 @@ import 'dotenv/config';
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import { loadAgentPrompt } from "./generate_prompt";
+import { sportEquipmentTool } from './tools/sportTool';
+import { culturalEquipmentTool } from './tools/cultureTool';
 
 const eventPrompt = loadAgentPrompt('event');
 
-const agentModel = new ChatOpenAI({ 
-  temperature: 0.5,
-  model: "llama3",
+class LocalChatOpenAI extends ChatOpenAI {
+  async getNumTokens(text: string): Promise<number> {
+    return Math.ceil(text.length / 4);
+  }
+}
+
+const agentModel = new LocalChatOpenAI({ 
+  temperature: 0.8,
+  model: "dolphin3.0-llama3.1-8b",
   streaming: true, 
   configuration: {
-    baseURL: "http://127.0.0.1:11434/v1",
+    baseURL: "http://127.0.0.1:1234/v1",
     apiKey: "not-needed"
   }
 });
@@ -19,5 +27,5 @@ const agentModel = new ChatOpenAI({
 export const eventAgent = createReactAgent({
   prompt: eventPrompt,
   llm: agentModel,
-  tools: [],
+  tools: [sportEquipmentTool, culturalEquipmentTool],
 });
