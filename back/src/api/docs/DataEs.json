@@ -1,0 +1,1096 @@
+{
+
+    "title":"data-es",
+    "type":"object",
+    "oneOf":[
+        {
+            "$ref":"#/definitions/data-es"
+        }
+    ]
+    ,
+    "definitions":{
+        "data-es":{
+            "properties":{
+                "records":{
+                    "type":"array",
+                    "items":{
+                        "$ref":"#/definitions/data-es_records"
+                    }
+                }
+            }
+        }
+        ,
+        "geoJSON":{
+            "title":"Geo JSON object",
+            "description":"Schema for a Geo JSON object",
+            "type":"object",
+            "required":[
+                "type"
+            ]
+            ,
+            "properties":{
+                "crs":{
+                    "$ref":"#/definitions/crs"
+                }
+                ,
+                "bbox":{
+                    "$ref":"#/definitions/bbox"
+                }
+            }
+            ,
+            "oneOf":[
+                {
+                    "$ref":"#/definitions/geometry"
+                }
+                ,
+                {
+                    "$ref":"#/definitions/geometryCollection"
+                }
+                ,
+                {
+                    "$ref":"#/definitions/feature"
+                }
+                ,
+                {
+                    "$ref":"#/definitions/featureCollection"
+                }
+            ]
+        }
+        ,
+        "bbox":{
+            "description":"A bounding box as defined by GeoJSON",
+            "type":"array",
+            "items":{
+                "type":"number"
+            }
+        }
+        ,
+        "crs":{
+            "title":"crs",
+            "description":"a Coordinate Reference System object",
+            "type":[
+                "object",
+                "null"
+            ]
+            ,
+            "required":[
+                "type",
+                "properties"
+            ]
+            ,
+            "properties":{
+                "type":{
+                    "type":"string"
+                }
+                ,
+                "properties":{
+                    "type":"object"
+                }
+            }
+            ,
+            "additionalProperties":false,
+            "oneOf":[
+                {
+                    "$ref":"#/definitions/namedCrs"
+                }
+                ,
+                {
+                    "$ref":"#/definitions/linkedCrs"
+                }
+            ]
+        }
+        ,
+        "namedCrs":{
+            "properties":{
+                "type":{
+                    "enum":[
+                        "name"
+                    ]
+                }
+                ,
+                "properties":{
+                    "required":[
+                        "name"
+                    ]
+                    ,
+                    "additionalProperties":false,
+                    "properties":{
+                        "name":{
+                            "type":"string"
+                        }
+                    }
+                }
+            }
+        }
+        ,
+        "linkedObject":{
+            "type":"object",
+            "required":[
+                "href"
+            ]
+            ,
+            "properties":{
+                "href":{
+                    "type":"string",
+                    "format":"uri"
+                }
+                ,
+                "type":{
+                    "type":"string",
+                    "description":"Suggested values: proj4, ogjwkt, esriwkt"
+                }
+            }
+        }
+        ,
+        "linkedCrs":{
+            "properties":{
+                "type":{
+                    "enum":[
+                        "link"
+                    ]
+                }
+                ,
+                "properties":{
+                    "$ref":"#/definitions/linkedObject"
+                }
+            }
+        }
+        ,
+        "geometryCollection":{
+            "title":"GeometryCollection",
+            "description":"A collection of geometry objects",
+            "required":[
+                "geometries"
+            ]
+            ,
+            "properties":{
+                "type":{
+                    "enum":[
+                        "GeometryCollection"
+                    ]
+                }
+                ,
+                "geometries":{
+                    "type":"array",
+                    "items":{
+                        "$ref":"http://json-schema.org/geojson/geometry.json#"
+                    }
+                }
+            }
+        }
+        ,
+        "feature":{
+            "title":"Feature",
+            "description":"A Geo JSON feature object",
+            "required":[
+                "geometry",
+                "properties"
+            ]
+            ,
+            "properties":{
+                "type":{
+                    "enum":[
+                        "Feature"
+                    ]
+                }
+                ,
+                "geometry":{
+                    "oneOf":[
+                        {
+                            "type":"null"
+                        }
+                        ,
+                        {
+                            "$ref":"#/definitions/geometry"
+                        }
+                    ]
+                }
+                ,
+                "properties":{
+                    "type":[
+                        "object",
+                        "null"
+                    ]
+                }
+                ,
+                "id":{
+                }
+            }
+        }
+        ,
+        "featureCollection":{
+            "title":"FeatureCollection",
+            "description":"A Geo JSON feature collection",
+            "required":[
+                "features"
+            ]
+            ,
+            "properties":{
+                "type":{
+                    "enum":[
+                        "FeatureCollection"
+                    ]
+                }
+                ,
+                "features":{
+                    "type":"array",
+                    "items":{
+                        "$ref":"#/definitions/feature"
+                    }
+                }
+            }
+        }
+        ,
+        "geometry":{
+            "title":"geometry",
+            "description":"One geometry as defined by GeoJSON",
+            "type":"object",
+            "required":[
+                "type",
+                "coordinates"
+            ]
+            ,
+            "oneOf":[
+                {
+                    "title":"Point",
+                    "properties":{
+                        "type":{
+                            "enum":[
+                                "Point"
+                            ]
+                        }
+                        ,
+                        "coordinates":{
+                            "$ref":"#/definitions/position"
+                        }
+                    }
+                }
+                ,
+                {
+                    "title":"MultiPoint",
+                    "properties":{
+                        "type":{
+                            "enum":[
+                                "MultiPoint"
+                            ]
+                        }
+                        ,
+                        "coordinates":{
+                            "$ref":"#/definitions/positionArray"
+                        }
+                    }
+                }
+                ,
+                {
+                    "title":"LineString",
+                    "properties":{
+                        "type":{
+                            "enum":[
+                                "LineString"
+                            ]
+                        }
+                        ,
+                        "coordinates":{
+                            "$ref":"#/definitions/lineString"
+                        }
+                    }
+                }
+                ,
+                {
+                    "title":"MultiLineString",
+                    "properties":{
+                        "type":{
+                            "enum":[
+                                "MultiLineString"
+                            ]
+                        }
+                        ,
+                        "coordinates":{
+                            "type":"array",
+                            "items":{
+                                "$ref":"#/definitions/lineString"
+                            }
+                        }
+                    }
+                }
+                ,
+                {
+                    "title":"Polygon",
+                    "properties":{
+                        "type":{
+                            "enum":[
+                                "Polygon"
+                            ]
+                        }
+                        ,
+                        "coordinates":{
+                            "$ref":"#/definitions/polygon"
+                        }
+                    }
+                }
+                ,
+                {
+                    "title":"MultiPolygon",
+                    "properties":{
+                        "type":{
+                            "enum":[
+                                "MultiPolygon"
+                            ]
+                        }
+                        ,
+                        "coordinates":{
+                            "type":"array",
+                            "items":{
+                                "$ref":"#/definitions/polygon"
+                            }
+                        }
+                    }
+                }
+            ]
+            ,
+            "position":{
+                "description":"A single position",
+                "type":"array",
+                "minItems":2,
+                "items":[
+                    {
+                        "type":"number"
+                    }
+                    ,
+                    {
+                        "type":"number"
+                    }
+                ]
+                ,
+                "additionalItems":false
+            }
+            ,
+            "positionArray":{
+                "description":"An array of positions",
+                "type":"array",
+                "items":{
+                    "$ref":"#/definitions/position"
+                }
+            }
+            ,
+            "lineString":{
+                "description":"An array of two or more positions",
+                "allOf":[
+                    {
+                        "$ref":"#/definitions/positionArray"
+                    }
+                    ,
+                    {
+                        "minItems":2
+                    }
+                ]
+            }
+            ,
+            "linearRing":{
+                "description":"An array of four positions where the first equals the last",
+                "allOf":[
+                    {
+                        "$ref":"#/definitions/positionArray"
+                    }
+                    ,
+                    {
+                        "minItems":4
+                    }
+                ]
+            }
+            ,
+            "polygon":{
+                "description":"An array of linear rings",
+                "type":"array",
+                "items":{
+                    "$ref":"#/definitions/linearRing"
+                }
+            }
+        }
+        ,
+        "data-es_records":{
+            "properties":{
+                "fields":{
+                    "type":"object",
+                    "properties":{
+                        "equip_numero":{
+                            "type":"string",
+                            "title":"Numéro de l'équipement sportif",
+                            "description":"Identifiant unique de l'équipement sportif. Il est composé : d'un "E"; d'un nombre à quatre chiffre s'incrémentant pour chaque nouvel équipement dans l'installation; de l'identifiant de l'installation auquel il est rattaché."
+                        }
+                        ,
+                        "inst_numero":{
+                            "type":"string",
+                            "title":"Numéro de l'installation sportive",
+                            "description":"Identifiant unique de l'installation sportive. Il est composé : d'un "I"; du code INSEE d'origine où l'équipement a été créé à cinq chiffre ; d'un nombre à quatre chiffre s'incrémentant pour chaque nouvelle installation dans la commune."
+                        }
+                        ,
+                        "inst_enqu_date":{
+                            "type":"string",
+                            "format":"date",
+                            "title":"Date de l'enquête",
+                            "description":"Date d'enquête de la fiche installation."
+                        }
+                        ,
+                        "inst_nom":{
+                            "type":"string",
+                            "title":"Nom de l'installation sportive",
+                            "description":" Nom(s) généralement utilisé pour identifier l’installation."
+                        }
+                        ,
+                        "inst_siret":{
+                            "type":"string",
+                            "title":"SIRET Installation",
+                            "description":"SIRET de l'installation, cette donnée est récente et peux ne pas être précisée."
+                        }
+                        ,
+                        "inst_adresse":{
+                            "type":"string",
+                            "title":"Adresse",
+                            "description":"Numéro de voie, rue, lieu-dit de l’installation. Si l’installation est sur plusieurs communes, il est indiqué son adresse principale, les autres communes sont précisée au critère "inst_obs"."
+                        }
+                        ,
+                        "inst_cp":{
+                            "type":"string",
+                            "title":"Code Postal",
+                            "description":"Code Postal"
+                        }
+                        ,
+                        "new_name":{
+                            "type":"string",
+                            "title":"Commune nom",
+                            "description":" Nom de la commune où se situent l'installation."
+                        }
+                        ,
+                        "new_code":{
+                            "type":"string",
+                            "title":"Commune INSEE",
+                            "description":"Code INSEE de la commune où se situe l'installation."
+                        }
+                        ,
+                        "inst_part_type_filter":{
+                            "type":"string",
+                            "title":"Type de particularité de l'installation",
+                            "description":"Type de particularité de l'installation, format nécessaire pour API et tableaux de bord de Data ES."
+                        }
+                        ,
+                        "inst_uai":{
+                            "type":"string",
+                            "title":"Unité Administrative Immatriculée (UAI)",
+                            "description":"Unité Administrative Immatriculée (UAI) propre aux établissements scolaires. Permet le croisement d'autres bases de données."
+                        }
+                        ,
+                        "inst_acc_handi_type":{
+                            "type":"string",
+                            "title":"Accessibilité de l'installation en fonction du type handicap",
+                            "description":"Type d'accessibilité aux personnes handicapées, toute installation offrant à ces personnes, notamment à celles qui se déplacent en fauteuil roulant, la possibilité (avec ou sans aménagements), dans des conditions normales d’usage, et de façon autonome, à savoir : entrer, circuler et sortir de l’enceinte dans lequel se trouve l’(les) équipement(s). L’accessibilité aux équipements et leurs aménagements (aire de jeu, tribunes, vestiaires …) est prévue plus loin."
+                        }
+                        ,
+                        "inst_trans_type":{
+                            "type":"string",
+                            "title":"Accessibilité de l'installation en transport en commun des différents mode",
+                            "description":"Type de transport en commun accessible à l'installation, ceux ci doivent desservir l’installation à moins de 10 minutes de marche à pied."
+                        }
+                        ,
+                        "inst_obs":{
+                            "type":"string",
+                            "title":"Observation Installation",
+                            "description":"Toutes informations complémentaires relatives à l’installation pertinentes et toutes informations utiles à la compréhension de la fiche pour l'utilisateur ou la saisie."
+                        }
+                        ,
+                        "inst_date_etat":{
+                            "type":"string",
+                            "format":"date",
+                            "title":"Date de changement d'état de la fiche d'enquête",
+                            "description":"Date du dernier changement de l'état de la fiche installation."
+                        }
+                        ,
+                        "inst_date_creation":{
+                            "type":"string",
+                            "format":"date",
+                            "title":"Date de création de la fiche d'enquête",
+                            "description":"Date de création de la fiche installation."
+                        }
+                        ,
+                        "inst_hs_bool":{
+                            "type":"string",
+                            "title":"Installation hors-service",
+                            "description":"Est classé hors service toute installation existante qui n’est : plus gérée, animée et entretenue ; définitivement fermée ; en état d’abandon total manifeste. Si l’installation est utilisée par des pratiquants malgré sa vétusté et/ou sa dangerosité, elle n’est pas qualifiée comme "Hors service". Point particulier : si l’installation est détruite ou si l’installation ne peut plus être remise en service sans une reconstruction totale, celle-ci devra être supprimée de la base de données."
+                        }
+                        ,
+                        "epci_code":{
+                            "type":"string",
+                            "title":"EPCI INSEE",
+                            "description":" Code de l'Établissements Publics de Coopération Intercommunale (EPCI), découle du code INSEE."
+                        }
+                        ,
+                        "dep_code":{
+                            "type":"string",
+                            "title":"Département Code",
+                            "description":"Code du département sans taille de caractère minimale (exemple : Ain = 1), découle du code INSEE."
+                        }
+                        ,
+                        "dep_nom":{
+                            "type":"string",
+                            "title":"Département Nom",
+                            "description":" Nom du département, découle du code INSEE."
+                        }
+                        ,
+                        "reg_code":{
+                            "type":"string",
+                            "title":"Région Code",
+                            "description":" Code de la région, découle du code INSEE."
+                        }
+                        ,
+                        "reg_nom":{
+                            "type":"string",
+                            "title":"Région Nom",
+                            "description":"Nom de la région, découle du code INSEE."
+                        }
+                        ,
+                        "epci_nom":{
+                            "type":"string",
+                            "title":"EPCI Nom",
+                            "description":" Nom de l'Établissements Publics de Coopération Intercommunale (EPCI), découle du code INSEE."
+                        }
+                        ,
+                        "code_bdv":{
+                            "type":"string",
+                            "title":"Bassin de vie Code",
+                            "description":" Code du Bassin de Vie (BdV), découle du code INSEE."
+                        }
+                        ,
+                        "lib_bdv":{
+                            "type":"string",
+                            "title":"Bassin de vie Nom",
+                            "description":" Nom du Bassin de Vie (BdV), découle du code INSEE."
+                        }
+                        ,
+                        "arr_code":{
+                            "type":"string",
+                            "title":"Arrondissement Code",
+                            "description":" Code de l'arrondissement, découle du code INSEE."
+                        }
+                        ,
+                        "arr_name":{
+                            "type":"string",
+                            "title":"Arrondissement Nom",
+                            "description":"Nom de l’arrondissement, découle du code INSEE."
+                        }
+                        ,
+                        "dens_niveau":{
+                            "type":"integer",
+                            "title":"Densite Niveau",
+                            "description":"Niveau de densité de la commune selon la grille communale de densité de l'INSEE, découle du code INSEE."
+                        }
+                        ,
+                        "dens_lib":{
+                            "type":"string",
+                            "title":"Densite Catégorie",
+                            "description":"Densité de la commune selon la grille communale de densité de l'INSEE, découle du code INSEE."
+                        }
+                        ,
+                        "dep_code_filled":{
+                            "type":"string",
+                            "title":"Département Code Complet",
+                            "description":" Code du département avec taille de caractère minimale (exemple : Ain = 01), découle du code INSEE."
+                        }
+                        ,
+                        "aca_nom":{
+                            "type":"string",
+                            "title":"Réctorat Nom",
+                            "description":" Circonscription administrative de référence de l'Éducation Nationale, découle du code INSEE."
+                        }
+                        ,
+                        "zrr_simp":{
+                            "type":"string",
+                            "title":"ZRR Simplifié",
+                            "description":" Classement en ZRR de la commune, découle du code INSEE."
+                        }
+                        ,
+                        "equip_nom":{
+                            "type":"string",
+                            "title":"Nom de l'équipement sportif",
+                            "description":" Nom(s) généralement utilisé pour identifier l'équipement."
+                        }
+                        ,
+                        "equip_type_name":{
+                            "type":"string",
+                            "title":"Type d'équipement sportif",
+                            "description":"Nom du type d'équipement."
+                        }
+                        ,
+                        "equip_coordonnees":{
+                            "type":"array",
+                            "minItems":2,
+                            "maxItems":2,
+                            "items":{
+                                "type":"number"
+                            }
+                            ,
+                            "title":"Coordonnées",
+                            "description":" Coordonnées au format WGS84."
+                        }
+                        ,
+                        "equip_prop_nom":{
+                            "type":"string",
+                            "title":"Nom du propriétaire",
+                            "description":" Nom du propriétaire principal de l’installation."
+                        }
+                        ,
+                        "equip_prop_type":{
+                            "type":"string",
+                            "title":"Type de propriétaire",
+                            "description":" Type du propriétaire principal, si un secondaire est indiqué : concerne le bâti (équipement, vestiaires, tribunes…)."
+                        }
+                        ,
+                        "equip_propsec_type":{
+                            "type":"string",
+                            "title":"Type de propriétaire secondaire",
+                            "description":"Type du propriétaire secondaire si différent du principal, concerne le sol (parcelle de terrain…)."
+                        }
+                        ,
+                        "equip_gest_type":{
+                            "type":"string",
+                            "title":"Type de gestionnaire",
+                            "description":"Type du gestionnaire principal, si la valeur est nulle, il est commun de dire que le propriétaire principal est gestionnaire de l'équipement."
+                        }
+                        ,
+                        "equip_cogest_type":{
+                            "type":"string",
+                            "title":"Type du co-gestionnaire",
+                            "description":" Type du co-gestionnaire de l'équipement."
+                        }
+                        ,
+                        "equip_dsp":{
+                            "type":"string",
+                            "title":"Gestion en DSP",
+                            "description":" Équipement géré en délégation de service public (DSP). "
+                        }
+                        ,
+                        "equip_ouv_public_bool":{
+                            "type":"string",
+                            "title":"Arrêté d'ouverture au public",
+                            "description":" Équipement faisant l’objet d’un arrêté d’ouverture au public."
+                        }
+                        ,
+                        "equip_erp_type":{
+                            "type":"string",
+                            "title":"Type d'ERP de l'établissement",
+                            "description":" Type d'ERP encadrant l'équipement."
+                        }
+                        ,
+                        "equip_erp_cat":{
+                            "type":"integer",
+                            "title":"Catégorie ERP de l'établissement",
+                            "description":"Les ERP sont classés en 5 catégories en fonction de leur capacité d'accueil."
+                        }
+                        ,
+                        "equip_homo_date":{
+                            "type":"string",
+                            "title":"Date de l'homologation préfectorale",
+                            "description":"Date de l'homologation prefectorale. L'homologation préfectorale est obligatoire si l'équipement offre : plus de 3000 places assises pour un équipement de plein air ; plus de 500 places assises pour un équipement couvert."
+                        }
+                        ,
+                        "equip_homo_periode":{
+                            "type":"string",
+                            "title":"Période de l'homologation préfectorale",
+                            "description":"Période de l'homologation préfectorale, se réfère à la valeur "equip_homo_date"."
+                        }
+                        ,
+                        "equip_service_date":{
+                            "type":"string",
+                            "title":"Année de mise en service",
+                            "description":"Correspond à l’année précise d’ouverture au public."
+                        }
+                        ,
+                        "equip_service_periode":{
+                            "type":"string",
+                            "title":"Période de mise en service",
+                            "description":" Période de la mise en service, se réfère à la valeur "equip_service_date""
+                        }
+                        ,
+                        "equip_travaux_date":{
+                            "type":"string",
+                            "title":"Date des derniers gros travaux",
+                            "description":"Correspond à l’année des derniers gros travaux réalisés. Dans certains cas (avant année 2000), il peut être indiqué au moins la décennie si l'année précisie n'a pas été trouvée (exemple : 1980). Si les travaux ont duré plusieurs années, seulement la fin des travaux est indiquée."
+                        }
+                        ,
+                        "equip_travaux_periode":{
+                            "type":"string",
+                            "title":"Période des derniers gros travaux",
+                            "description":"Période des derniers gros travaux, se réfère à la valeur "equip_travaux_date"."
+                        }
+                        ,
+                        "equip_travaux_type":{
+                            "type":"string",
+                            "title":"Motifs des derniers gros travaux",
+                            "description":"Nature des derniers gros travaux : mise en conformité avec les règlements (sécurité/ incendie/ hygiène/ accessibilité/ homologation), mise en conformité avec les normes AFNOR ou les règles fédérales, inadaptation aux attentes des usagers, dégâts liés à des dégradations (engendrant un risque pour les usagers) ou à une catastrophe naturelle ou industrielle, vétusté normale."
+                        }
+                        ,
+                        "equip_energie":{
+                            "type":"string",
+                            "title":"Types de chauffage - source d'énergie",
+                            "description":"Type d’énergie pour le chauffage et la climatisation de l'équipement."
+                        }
+                        ,
+                        "equip_nature":{
+                            "type":"string",
+                            "title":"Nature de l'équipement sportif",
+                            "description":"Nature de l'équipement (couvert, découvert...)"
+                        }
+                        ,
+                        "equip_sol":{
+                            "type":"string",
+                            "title":"Nature du sol",
+                            "description":"Concerne l’aire de pratique uniquement. Les modalités de variable suivantes ne sont pas cumulables, pour tous les sols qui résultent de mélanges de matières, la mettre dans la catégorie où la matière prédomine (exemple : 55% de sable + 45% plastique (pour un manège à chevaux) apparaît dans la catégorie nature de sol : « sable »)."
+                        }
+                        ,
+                        "equip_long":{
+                            "type":"number",
+                            "title":"Longueur de l'aire d'évolution",
+                            "description":"Longueur de l’aire d’évolution en mètre. Il intègre l’aire de pratique et les dégagements de sécurité réservés qui lui sont associés."
+                        }
+                        ,
+                        "equip_larg":{
+                            "type":"number",
+                            "title":"Largeur de l'aire d'évolution",
+                            "description":"Largeur de l’aire d’évolution en mètre. Il intègre l’aire de pratique et les dégagements de sécurité réservés qui lui sont associés."
+                        }
+                        ,
+                        "equip_haut":{
+                            "type":"number",
+                            "title":"Hauteur de l'aire d'évolution",
+                            "description":"Correspond à la hauteur libre minimale en mètre de l’espace dans lequel se déroule la pratique sportive. Pour les Structures Artificielles d’Escalade (SAE) dans une salle, voir la valeur "equip_sae_haut". Remarque : Pour les équipements sport de nature la hauteur peut correspondre dans certain cas au dénivelé présent sur le site. Par exemple pour un stade d’eau vive la hauteur correspond au dénivelé présent sur le stade. Ce nombre peut être négatif (exemple : - 63 m pour le dénivelé d’une cavité de spéléologie)."
+                        }
+                        ,
+                        "equip_surf":{
+                            "type":"number",
+                            "title":"Surface de l'aire d'évolution",
+                            "description":"Surface de l’aire d’évolution en mètre carré. Il intègre l’aire de pratique et les dégagements de sécurité réservés qui lui sont associés."
+                        }
+                        ,
+                        "equip_eclair":{
+                            "type":"string",
+                            "title":"Eclairage de l'aire d'évolution",
+                            "description":" Présence d’un éclairage artificiel pour l’aire d’évolution de l’équipement."
+                        }
+                        ,
+                        "equip_trib_nb":{
+                            "type":"integer",
+                            "title":"Nombre de places assises en tribune",
+                            "description":"Le nombre total de places assises en tribunes fixes ou télescopiques s'entend pour des tribunes permanentes (présence d’un local ou lieu spécifique pour les entreposer). S’il n’en existe pas, mettre « 0 ». Pour obtenir ce chiffre précis, vous pouvez vous référer à l’arrêté d’ouverture au public ou à l’arrêté d’homologation (nombre de places en tribunes fixes et télescopiques). Attention : sont exclues les tribunes démontables installées à l’occasion d’une manifestation temporaire ; si le nombre de places assises varie en fonction de l’activité pratiquée, il conviendra de prendre en compte le nombre le plus élevé ; sur des gradins ou bancs, on compte 2 spectateurs par mètre linéaire."
+                        }
+                        ,
+                        "equip_vest_sport":{
+                            "type":"integer",
+                            "title":"Nombre de vestiaires sportifs",
+                            "description":"Concerne les vestiaires réservés aux pratiquants."
+                        }
+                        ,
+                        "equip_vest_ens":{
+                            "type":"integer",
+                            "title":"Nombre de vestiaires arbitres/enseignants",
+                            "description":"Concerne les vestiaires strictement réservés aux arbitres et/ou enseignants."
+                        }
+                        ,
+                        "equip_douche":{
+                            "type":"string",
+                            "title":"Présence de douches",
+                            "description":"Les douches peuvent être directement accolées ou non aux vestiaires."
+                        }
+                        ,
+                        "equip_sanit":{
+                            "type":"string",
+                            "title":"Présence de sanitaires",
+                            "description":" Présence des sanitaires accessibles au public ou strictement dédiés aux pratiquants."
+                        }
+                        ,
+                        "equip_loc_type":{
+                            "type":"string",
+                            "title":"Types de locaux complémentaires",
+                            "description":"Locaux complémentaires accessibles à l’équipement : club(s) house, la notion de "club house" sous-entend un équipement offrant un minimum de prestations (Ex : accueil, boisson, réunions...) et ouvert de manière régulière ou permanente ; buvette, concerne les buvettes fixes ; infirmerie, ce local doit être identifié comme dédié à l’infirmerie (signalétique et matériel à demeure) ; réception/accueil, présence régulière d’un local ; bureau(x) clubs, local de travail permettant la gestion des affaires courantes d’une association (à bien distinguer du "club house") ; salle(s) de réunion/cours, offre un minimum de 10 places assises ; centre médico-sportif, local identifié ; local contrôle antidopage, ce local doit être identifié comme dédié au contrôle antidopage (signalétique) ; local de rangement, ce local doit être spécifique au rangement sportif ; autre. Les locaux techniques (matériel d’entretien, chaufferie…) et les locaux d’une surface inférieure à 3m² ne sont pas pris en compte."
+                        }
+                        ,
+                        "equip_conf_type":{
+                            "type":"string",
+                            "title":"Types d'aménagements de confort",
+                            "description":"Aménagements de confort accessible depuis l’équipement : sauna ; bains bouillonnants ; bains de vapeur/ hammam ; solarium ; autre."
+                        }
+                        ,
+                        "equip_acces_handi_mobilite":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite",
+                            "description":"Accessibilité aux personnes à mobilité réduite"
+                        }
+                        ,
+                        "equip_acces_handi_sensoriel":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes en situation de handicap sensoriel",
+                            "description":"Accessibilité aux personnes en situation de handicap sensoriel"
+                        }
+                        ,
+                        "equip_pdesi_pdipr":{
+                            "type":"string",
+                            "title":"Equipement inscrit au PDESI / PDIPR",
+                            "description":"Rentre dans le cadre du Plan Départemental des Espaces, Sites et Itinéraires (PDESI) ou Plan Départemental des Itinéraires de Promenade et de Randonnée (PDIPR)."
+                        }
+                        ,
+                        "equip_bassin_long":{
+                            "type":"number",
+                            "title":"Longueur du bassin",
+                            "description":"Longueur du bassin de natation en mètre."
+                        }
+                        ,
+                        "equip_bassin_larg":{
+                            "type":"number",
+                            "title":"Largeur du bassin",
+                            "description":"Largeur du bassin de natation en mètre."
+                        }
+                        ,
+                        "equip_bassin_surf":{
+                            "type":"number",
+                            "title":"Surface du bassin",
+                            "description":"Surface du bassin de natation en mètre carré."
+                        }
+                        ,
+                        "equip_bassin_min":{
+                            "type":"number",
+                            "title":"Profondeur minimale du bassin",
+                            "description":"Profondeur minimale du bassin de natation en mètre."
+                        }
+                        ,
+                        "equip_bassin_max":{
+                            "type":"number",
+                            "title":"Profondeur maximale du bassin",
+                            "description":"Profondeur maximale du bassin de natation en mètre."
+                        }
+                        ,
+                        "equip_piste_long":{
+                            "type":"number",
+                            "title":"Longueur de la piste",
+                            "description":"Longueur de la piste. Selon le type de piste, peut être un total ou une longueur générique."
+                        }
+                        ,
+                        "equip_sae_haut":{
+                            "type":"number",
+                            "title":"SAE: hauteur maximale de la structure",
+                            "description":"La hauteur maximale de la structure artificielle d'escalade (SAE) en mètres."
+                        }
+                        ,
+                        "equip_sae_surf":{
+                            "type":"number",
+                            "title":"SAE: surface totale de la structure",
+                            "description":"Surface totale de la structure artificielle d'escalade (SAE) en mètres carrés."
+                        }
+                        ,
+                        "equip_sae_couloir":{
+                            "type":"integer",
+                            "title":"SAE: nombre de couloirs de la structure",
+                            "description":"Correspond au nombre de personnes pouvant pratiquer sur la structure artificielle d'escalade (SAE) en même temps (surface de grimpe) sans « empiéter » sur la surface de grimpe d’un autre utilisateur."
+                        }
+                        ,
+                        "equip_pasdetir":{
+                            "type":"string",
+                            "title":"Type de pas de tir",
+                            "description":"Type de pas de tir. Chaque équipement ne peux être qu'un seul type de pas de tir mais disposer de plusieurs pas. Exemple dans un stad de tir : 1 poste sur un pas de tir 10 mètres (première fiche équipement) et 4 poste sur un pas de tir 20 mètres (deuxième fiche équipement)."
+                        }
+                        ,
+                        "equip_url":{
+                            "type":"string",
+                            "title":"Adresse internet de l'équipement",
+                            "description":" URL lié à l'équipement sportif ou à son installation."
+                        }
+                        ,
+                        "equip_utilisateur":{
+                            "type":"string",
+                            "title":"Type d'utilisation",
+                            "description":"Utilisateurs de l’équipement : Individuel(s) / Famille(s) ; Scolaires / Université(s) (Ex : élève d’un collège, association du service universitaire des APS…) ; Club(s) sportif(s)/ Comité(s) sportif(s)/ Ligue(s) sportive(s) / Fédération(s) (Ex : Association sportive de tennis…) ; Autre(s) association(s) et groupes divers (Ex : colonie de vacances, association culturelle, comité d’entreprise…)."
+                        }
+                        ,
+                        "equip_acc_libre":{
+                            "type":"string",
+                            "title":"Equipement d'accès libre",
+                            "description":"Est considéré comme équipement en accès libre, tout équipement : accessible à tous, de manière permanente(non clos) et permettant une pratique sportive, même non encadrée."
+                        }
+                        ,
+                        "equip_saison":{
+                            "type":"string",
+                            "title":"Ouverture exclusivement saisonnière",
+                            "description":"Concerne les équipements dont l’utilisation/l’exploitation n’existe que durant une période de l’année. Si un équipement est utilisé/exploité moins de 6 mois par an, il est considéré comme saisonnier."
+                        }
+                        ,
+                        "equip_obs":{
+                            "type":"string",
+                            "title":"Observation Equipement",
+                            "description":"Toutes informations complémentaires relatives à l'équipement pertinentes et toutes informations utiles à la compréhension de la fiche pour l'utilisateur ou la saisie."
+                        }
+                        ,
+                        "equip_type_famille":{
+                            "type":"string",
+                            "title":"Famille d'équipement sportif",
+                            "description":" Famille d'équipement, découle du type d'équipement."
+                        }
+                        ,
+                        "equip_type_code":{
+                            "type":"string",
+                            "title":"Code du type d'équipement sportif",
+                            "description":"Code du type d'équipement."
+                        }
+                        ,
+                        "equip_rnb":{
+                            "type":"string",
+                            "title":"RNB ID",
+                            "description":" Agrégation de l'identifiant bâtimentaire du Référentiel National du Bâtiment avant correction."
+                        }
+                        ,
+                        "inst_acc_handi_bool":{
+                            "type":"string",
+                            "title":"Accessibilité de l'installation en faveur des personnes en situation de handicap",
+                            "description":"Accessibilité aux personnes en situation de handicap, le type de handicap est précisé dans la valeur "inst_acc_handi_type"."
+                        }
+                        ,
+                        "inst_trans_bool":{
+                            "type":"string",
+                            "title":"Accessibilité de l'installation en transport en commun",
+                            "description":"Accessibilité en transport en commun, ceux ci doivent desservir l’installation à moins de 10 minutes de marche à pied."
+                        }
+                        ,
+                        "inst_part_bool":{
+                            "type":"string",
+                            "title":"Installation particulière",
+                            "description":"Particularité de l'installation, le type est précisié dans la valeur "inst_part_type". Est réputée accessible aux personnes handicapées, toute installation offrant à ces personnes, notamment à celles qui se déplacent en fauteuil roulant, la possibilité (avec ou sans aménagements), dans des conditions normales d’usage, et de façon autonome, à savoir : entrer, circuler et sortir de l’enceinte dans lequel se trouve l’(les) équipement(s). L’accessibilité aux équipements et leurs aménagements (aire de jeu, tribunes, vestiaires …) est prévue plus loin."
+                        }
+                        ,
+                        "equip_loc_bool":{
+                            "type":"string",
+                            "title":"Locaux complémentaires",
+                            "description":" Locaux complémentaires accessible depuis l''équipement, décris plus loin dans la valeur "equip_loc_type"."
+                        }
+                        ,
+                        "equip_pmr_vest":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite aux vestiaires",
+                            "description":"Accessibilité aux personnes à mobilité réduite aux vestiaires"
+                        }
+                        ,
+                        "equip_pmr_acc":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite à l'accueil",
+                            "description":"Accessibilité aux personnes à mobilité réduite à l'accueil"
+                        }
+                        ,
+                        "equip_pmr_aire":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite à l'aire de jeu",
+                            "description":"Accessibilité aux personnes à mobilité réduite à l'aire de jeu"
+                        }
+                        ,
+                        "equip_pmr_chem":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite aux cheminements",
+                            "description":" Accessibilité aux personnes à mobilité réduite aux cheminements"
+                        }
+                        ,
+                        "equip_pmr_douche":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite aux douches",
+                            "description":"Accessibilité aux personnes à mobilité réduite aux douches"
+                        }
+                        ,
+                        "equip_pmr_sanit":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite aux sanitaires",
+                            "description":"Accessibilité aux personnes à mobilité réduite aux sanitaires"
+                        }
+                        ,
+                        "equip_pmr_trib":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes à mobilité réduite aux tribunes",
+                            "description":" Accessibilité aux personnes à mobilité réduite aux tribunes"
+                        }
+                        ,
+                        "equip_pshs_aire":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes en situation de handicap sensoriel à l'aire de jeu",
+                            "description":" Accessibilité aux personnes en situation de handicap sensoriel à l'aire de jeu"
+                        }
+                        ,
+                        "equip_pshs_chem":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes en situation de handicap sensoriel aux cheminements",
+                            "description":"Accessibilité aux personnes en situation de handicap sensoriel aux cheminements"
+                        }
+                        ,
+                        "equip_pshs_sanit":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes en situation de handicap sensoriel aux sanitaires",
+                            "description":"Accessibilité aux personnes en situation de handicap sensoriel aux sanitaires"
+                        }
+                        ,
+                        "equip_pshs_sign":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes en situation de handicap sensoriel - signalétique",
+                            "description":"Accessibilité aux personnes en situation de handicap sensoriel - signalétique"
+                        }
+                        ,
+                        "equip_pshs_trib":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes en situation de handicap sensoriel aux tribunes",
+                            "description":"Accessibilité aux personnes en situation de handicap sensoriel aux tribunes"
+                        }
+                        ,
+                        "equip_pshs_vest":{
+                            "type":"string",
+                            "title":"Accessibilité aux personnes en situation de handicap sensoriel aux vestiaires",
+                            "description":" Accessibilité aux personnes en situation de handicap sensoriel aux vestiaires"
+                        }
+                        ,
+                        "equip_x":{
+                            "type":"string",
+                            "title":"Longitude",
+                            "description":"Longitude au format WGS84."
+                        }
+                        ,
+                        "equip_y":{
+                            "type":"string",
+                            "title":"Latitude",
+                            "description":"Latitude au format WGS84."
+                        }
+                        ,
+                        "inst_part_type":{
+                            "type":"string",
+                            "title":"Type de particularité de l'installation (brute)",
+                            "description":"Type de particularité de l'installation, format nécessaire à InfraSport (ANS)."
+                        }
+                        ,
+                        "equip_qpv":{
+                            "type":"string",
+                            "title":"QPV",
+                            "description":" QPV dans lequel l'équipement se trouve"
+                        }
+                        ,
+                        "equip_qpv_200m":{
+                            "type":"string",
+                            "title":"QPV à 200 mètres",
+                            "description":"QPV entourant l'équipement et/ou à 200 mètre du zonage du QPV. Remarque, plusieurs QPV peuvent être notés."
+                        }
+                        ,
+                        "categorie":{
+                            "type":"string",
+                            "title":"Catégorie",
+                            "description":"QPV entourant l'équipement et/ou à 200 mètre du zonage du QPV. Remarque, plusieurs QPV peuvent être notés."
+                        }
+                        ,
+                        "gen_2024fin_labellisation":{
+                            "type":"string",
+                            "title":"gen_2024Fin_Labellisation",
+                            "description":""
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}

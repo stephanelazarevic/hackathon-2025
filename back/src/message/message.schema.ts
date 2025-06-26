@@ -1,7 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-
-export type UserDocument = Message & Document;
 
 // Enum pour les senders
 export enum Sender {
@@ -21,5 +18,3 @@ export class Message {
   @Prop()
   timestamp: Date;
 }
-
-export const MessageSchema = SchemaFactory.createForClass(Message);

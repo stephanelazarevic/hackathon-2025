@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from './users/user.module';
 import { ProjectModule } from './project/project.module';
 import { MessageModule } from './message/message.module';
+import { ApiModule } from './api/api.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -20,8 +21,7 @@ import { MessageModule } from './message/message.module';
     }),
     // Import the UsersModule
     UserModule,
-    ProjectModule,
-    MessageModule,
+    ApiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
