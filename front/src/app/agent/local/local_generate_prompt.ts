@@ -27,7 +27,7 @@ export function loadAgentPrompt(agentId: string): string {
     iso_time: now.toISOString().split('T')[1].split('.')[0],
   };
 
-  const promptPath = path.join(process.cwd(), 'src', 'app', 'agent', `${agentId}.md`);
+  const promptPath = path.join(process.cwd(), 'src', 'app', 'agent', 'local', `${agentId}.md`);
 
   if (!fs.existsSync(promptPath)) {
     throw new Error(`Prompt file not found: ${promptPath}`);

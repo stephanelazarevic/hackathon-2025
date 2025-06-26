@@ -61,7 +61,6 @@ function AIAssistant() {
   const [additionalMessages, setAdditionalMessages] = useState<Message[]>([]); // Messages supplémentaires après questionnaire
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleSuggestionClick = (suggestion: string) => {
     setPrompt(suggestion);
@@ -80,12 +79,20 @@ function AIAssistant() {
     setLoading(true);
 
     try {
+<<<<<<< HEAD:front/src/app/ai/page.tsx
       // Si on est en conversation normale (après questionnaire) et pas forcé à créer un questionnaire
       if (!forceQuestionnaire && messages.length > 0 && !fillInTheBlankMode) {
         // Chat normal avec l'IA
         const contextSummary = questionAnswerPairs.length > 0 
           ? `L'utilisateur a complété un questionnaire avec ${questionAnswerPairs.length} réponses: ${questionAnswerPairs.map(p => `${p.question}: ${p.answer}`).join('; ')}`
           : '';
+=======
+      const response = await fetch('/api/agent/local', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+>>>>>>> 23fd3cb (commit refacto pre rebase):front/src/app/ai/local/page.tsx
 
         const response = await fetch('/api/chat', {
           method: 'POST',
@@ -304,6 +311,7 @@ function AIAssistant() {
     }
   };
 
+<<<<<<< HEAD:front/src/app/ai/page.tsx
   const stopStreaming = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -468,6 +476,8 @@ function AIAssistant() {
     }
   };
 
+=======
+>>>>>>> 23fd3cb (commit refacto pre rebase):front/src/app/ai/local/page.tsx
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -557,6 +567,7 @@ function AIAssistant() {
                 )}
               </div>
 
+<<<<<<< HEAD:front/src/app/ai/page.tsx
               {/* Navigation */}
               <div className="flex justify-between items-center pt-6 border-t border-gray-100">
                 <button
@@ -598,6 +609,17 @@ function AIAssistant() {
               showNewQuestionnaireButton={messages.length > 0 && prompt.trim().length > 0}
             />
           )}
+=======
+        <div className="flex gap-2 mt-2">
+          <button
+            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-2 px-4 rounded transition-colors"
+            onClick={sendPrompt}
+            disabled={loading || !prompt.trim() || isStreaming}
+          >
+            {loading || isStreaming ? 'IA en train d\'écrire...' : 'Envoyer'}
+          </button>
+          
+>>>>>>> 23fd3cb (commit refacto pre rebase):front/src/app/ai/local/page.tsx
         </div>
 
         {/* Panneau récapitulatif */}

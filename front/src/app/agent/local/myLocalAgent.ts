@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
-import { loadAgentPrompt } from "./generate_prompt";
+import { loadAgentPrompt } from "./local_generate_prompt";
 import { sportEquipmentTool } from './tools/sportTool';
 import { culturalEquipmentTool } from './tools/cultureTool';
 

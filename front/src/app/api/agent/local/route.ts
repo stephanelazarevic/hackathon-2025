@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { eventAgent } from '@/app/agent/myAgent';
+import { eventAgent } from '@/app/agent/local/myLocalAgent';
 
 export async function POST(req: NextRequest) {
   try {
