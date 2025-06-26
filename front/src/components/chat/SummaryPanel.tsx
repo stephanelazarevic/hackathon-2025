@@ -18,6 +18,8 @@ interface SummaryPanelProps {
   onNewQuestionnaire?: () => void;
   onNewDiscussion?: () => void;
   onGenerateReport?: () => void;
+  onRegenerateSummary?: () => Promise<void>;
+  hasAdditionalInfo?: boolean;
 }
 
 export default function SummaryPanel({ 
@@ -28,7 +30,9 @@ export default function SummaryPanel({
   isCompleted = false,
   onNewQuestionnaire,
   onNewDiscussion,
-  onGenerateReport
+  onGenerateReport,
+  onRegenerateSummary,
+  hasAdditionalInfo = false
 }: SummaryPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -165,6 +169,14 @@ export default function SummaryPanel({
                   </p>
                 </div>
                 <div className="space-y-2">
+                  {hasAdditionalInfo && onRegenerateSummary && (
+                    <button
+                      onClick={onRegenerateSummary}
+                      className="w-full bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors duration-200"
+                    >
+                      🔄 Mettre à jour le résumé
+                    </button>
+                  )}
                   {onGenerateReport && (
                     <button
                       onClick={onGenerateReport}

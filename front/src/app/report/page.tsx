@@ -452,21 +452,43 @@ ${reportData.questionnaire.questions.map((q: { question: string; id: string }) =
                       <span className="ml-12">{children}</span>
                     </h1>
                   ),
-                  h2: ({ children }) => (
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6 mt-10 flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-l-4 border-purple-500">
-                      <span className="text-3xl">✨</span>
-                      {children}
-                    </h2>
-                  ),
+                  h2: ({ children }) => {
+                    // Style spécial pour le planning
+                    if (children?.toString().includes('PLANNING') || children?.toString().includes('📅')) {
+                      return (
+                        <h2 className="text-2xl font-bold text-white mb-6 mt-10 flex items-center gap-3 p-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl border-l-4 border-yellow-400 shadow-lg">
+                          <span className="text-3xl">📅</span>
+                          {children}
+                        </h2>
+                      );
+                    }
+                    return (
+                      <h2 className="text-2xl font-bold text-gray-800 mb-6 mt-10 flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-l-4 border-purple-500">
+                        <span className="text-3xl">✨</span>
+                        {children}
+                      </h2>
+                    );
+                  },
                   h3: ({ children }) => (
                     <h3 className="text-xl font-semibold text-indigo-700 mb-4 mt-8 flex items-center gap-2">
                       <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
                       {children}
                     </h3>
                   ),
-                  p: ({ children }) => (
-                    <p className="text-gray-700 mb-6 leading-relaxed text-lg">{children}</p>
-                  ),
+                  p: ({ children }) => {
+                    // Style spécial pour les horaires dans le planning
+                    const text = children?.toString() || '';
+                    if (text.match(/^\*\*\d{1,2}h\d{2}/)) {
+                      return (
+                        <div className="my-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-r-lg">
+                          <p className="text-gray-700 leading-relaxed text-lg font-medium">{children}</p>
+                        </div>
+                      );
+                    }
+                    return (
+                      <p className="text-gray-700 mb-6 leading-relaxed text-lg">{children}</p>
+                    );
+                  },
                   ul: ({ children }) => (
                     <ul className="space-y-3 mb-6">{children}</ul>
                   ),
@@ -479,11 +501,22 @@ ${reportData.questionnaire.questions.map((q: { question: string; id: string }) =
                       <span>{children}</span>
                     </li>
                   ),
-                  strong: ({ children }) => (
-                    <strong className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      {children}
-                    </strong>
-                  ),
+                  strong: ({ children }) => {
+                    // Style spécial pour les horaires en gras
+                    const text = children?.toString() || '';
+                    if (text.match(/^\d{1,2}h\d{2}/)) {
+                      return (
+                        <strong className="font-bold text-indigo-700 bg-indigo-100 px-2 py-1 rounded">
+                          {children}
+                        </strong>
+                      );
+                    }
+                    return (
+                      <strong className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        {children}
+                      </strong>
+                    );
+                  },
                   blockquote: ({ children }) => (
                     <blockquote className="border-l-4 border-gradient-to-b from-blue-500 to-purple-500 pl-6 py-4 my-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-r-xl italic text-gray-700 relative">
                       <span className="absolute top-2 left-2 text-2xl text-blue-400">💭</span>

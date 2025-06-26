@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ChatOllama } from "@langchain/ollama";
+import OpenAI from 'openai';
 
 type Question = {
   id: string;
@@ -15,15 +15,17 @@ type QuestionnaireData = {
   questions: Question[];
 };
 
-const model = new ChatOllama({
-  baseUrl: "http://localhost:11434", // URL par défaut d'Ollama
-  model: "llama3",
-  temperature: 0.7,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(request: NextRequest) {
   try {
-    const { questionnaire, answers }: { questionnaire: QuestionnaireData; answers: Record<string, string> } = await request.json();
+    const { questionnaire, answers, additionalMessages }: { 
+      questionnaire: QuestionnaireData; 
+      answers: Record<string, string>;
+      additionalMessages?: Array<{ role: string; content: string }>;
+    } = await request.json();
 
     // Construire le contexte avec les questions et réponses
     let context = `Questionnaire: ${questionnaire.title}\n\n`;
@@ -33,29 +35,59 @@ export async function POST(request: NextRequest) {
       context += `Q: ${question.question}\nR: ${answer}\n\n`;
     });
 
+    // Ajouter les messages supplémentaires si disponibles
+    if (additionalMessages && additionalMessages.length > 0) {
+      context += `\nINFORMATIONS SUPPLÉMENTAIRES DE LA CONVERSATION:\n`;
+      additionalMessages.forEach((msg) => {
+        context += `${msg.role === 'user' ? 'Utilisateur' : 'Assistant'}: ${msg.content}\n`;
+      });
+      context += '\n';
+    }
+
     const prompt = `
-Basé sur ce questionnaire complété par l'utilisateur, génère une réponse complète, personnalisée et utile. En français, en utilisant les réponses fournies pour donner des conseils pratiques et adaptés.
+Tu es un expert consultant en événementiel et organisation. Analyse ces réponses et fournis des conseils détaillés, des suggestions créatives et des recommandations pratiques.
 
 ${context}
 
-Instructions:
-1. Analyse toutes les réponses fournies
-2. Identifie les besoins principaux de l'utilisateur
-3. Fournis des recommandations concrètes et détaillées
-4. Inclus des conseils pratiques et actionables
-5. Structure ta réponse de manière claire avec des sections
-6. Sois professionnel mais accessible
-7. Adapte ton ton au contexte (formel pour business, décontracté pour personnel)
+Instructions DÉTAILLÉES :
+${additionalMessages && additionalMessages.length > 0 ? 
+  '⚠️ **IMPORTANT** : L\'utilisateur a fourni des informations supplémentaires après le questionnaire. Intègre-les ABSOLUMENT dans ton analyse et tes recommandations.\n\n' : 
+  ''}1. 📋 **ANALYSE** : Résume les informations clés en 1-2 phrases${additionalMessages && additionalMessages.length > 0 ? ' (incluant les précisions supplémentaires)' : ''}
+2. 💡 **CONSEILS PERSONNALISÉS** : Donne 3-4 conseils spécifiques basés sur TOUTES les informations disponibles
+3. 🎉 **SUGGESTIONS CRÉATIVES** : Propose 2-3 idées originales pour l'événement/projet
+4. 📍 **RECOMMANDATIONS DE LIEUX** : Suggère des types de lieux appropriés
+5. 🍽️ **SUGGESTIONS CULINAIRES** : Recommande menu/traiteur selon le contexte
+6. 💰 **OPTIMISATION BUDGET** : Conseils pour bien utiliser le budget mentionné
+7. ⚠️ **POINTS D'ATTENTION** : 2-3 choses importantes à ne pas oublier
+8. 🎯 **PROCHAINES ÉTAPES** : Actions concrètes à entreprendre
 
-Génère une réponse de 200-400 mots maximum, bien structurée et immédiatement utile.
+Ton style :
+- Professionnel mais chaleureux
+- Conseils concrets et actionnables
+- Utilise des émojis pour structurer
+- Adapte le ton au type d'événement
+- Maximum 500 mots, bien structuré
+
+Sois créatif, inspirant et pratique !
 `;
 
-    const response = await model.invoke([
-      { role: 'system', content: 'Tu es Ervia, un assistant IA expert qui fournit des conseils personnalisés basés sur les réponses des utilisateurs. Tu es serviable, précis et donnes des conseils concrets.' },
-      { role: 'user', content: prompt }
-    ]);
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "Tu es un expert consultant en événementiel avec 10 ans d'expérience. Tu donnes des conseils personnalisés, créatifs et pratiques. Tu es enthousiaste, professionnel et tu inspires confiance."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7, // Plus créatif pour les suggestions
+      max_tokens: 1000,
+    });
 
-    const finalResponse = response.content as string;
+    const finalResponse = response.choices[0]?.message?.content || '';
 
     return NextResponse.json({ 
       finalResponse,

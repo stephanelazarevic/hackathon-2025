@@ -13,18 +13,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(request: NextRequest) {
+export async function POSTrequest: NextRequest) {
   try {
-    const { questionnaire, answers, userRequest, additionalMessages } = await request.json();
-
-    // Construire le contexte des messages supplémentaires
-    let additionalContext = '';
-    if (additionalMessages && additionalMessages.length > 0) {
-      additionalContext = '\n\nINFORMATIONS SUPPLÉMENTAIRES DE LA CONVERSATION:\n';
-      additionalMessages.forEach((msg: { role: string; content: string }) => {
-        additionalContext += `${msg.role === 'user' ? 'Utilisateur' : 'Assistant'}: ${msg.content}\n`;
-      });
-    }
+    const { questionnaire, answers, userRequest } = await request.json();
 
     const prompt = `
 Tu es un consultant expert en événementiel. Analyse la demande utilisateur et génère un rapport PARFAITEMENT ADAPTÉ.
@@ -37,7 +28,7 @@ RÉPONSES COLLECTÉES:
 ${questionnaire.questions.map((question: Question) => {
   const answer = answers[question.id] || 'Non répondu';
   return `Q: ${question.question}\nR: ${answer}`;
-}).join('\n\n')}${additionalContext}
+}).join('\n\n')}
 
 INSTRUCTIONS CRUCIALES:
 1. ANALYSE INTELLIGEMMENT la demande pour déterminer EXACTEMENT ce qui est demandé

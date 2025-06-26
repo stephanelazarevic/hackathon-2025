@@ -1,12 +1,19 @@
 import React from 'react';
+import Image from 'next/image';
 
 const ChatHeader: React.FC = () => {
   return (
     <div className="sticky top-0 z-30 text-center py-3 bg-white border-b border-gray-100 shadow-sm">
       <div className="max-w-2xl mx-auto px-6">
-        <h1 className="text-2xl font-black mb-1 text-black tracking-tight">
-          Ervia
-        </h1>
+        <div className='flex items-center justify-center mb-2'>
+          <Image
+            src="/img/ervia_text_logo.png"
+            alt="Ervia Logo"
+            width={128}
+            height={64}
+            priority
+          />
+        </div>
         <p className="text-xs text-gray-500 font-medium">
           Assistant IA moderne pour vos évènements
         </p>

@@ -15,6 +15,8 @@ Les questions seront présentées sous forme de "phrases à trou" où l'utilisat
 
 Demande utilisateur: "${userRequest}"
 
+Tu dois analyser intelligemment la demande et créer des questions pertinentes et spécifiques au contexte.
+
 Tu dois retourner UNIQUEMENT un JSON valide avec cette structure exacte:
 {
   "title": "Titre du questionnaire",
@@ -22,7 +24,7 @@ Tu dois retourner UNIQUEMENT un JSON valide avec cette structure exacte:
   "questions": [
     {
       "id": "question_1",
-      "question": "Question formulée comme une affirmation à compléter (ex: 'Mon budget pour ce projet est' au lieu de 'Quel est votre budget ?')",
+      "question": "Question formulée comme une phrase avec un BLANC à compléter",
       "type": "text|choice|number|date",
       "options": ["option1", "option2"] // seulement si type = "choice",
       "required": true/false
@@ -30,17 +32,24 @@ Tu dois retourner UNIQUEMENT un JSON valide avec cette structure exacte:
   ]
 }
 
-Règles importantes:
-- Maximum 7 questions pertinentes
-- Formule les questions comme des AFFIRMATIONS à compléter, pas comme des questions
-- Exemples de bonnes formulations:
-  * "Mon événement aura lieu le" (au lieu de "Quand aura lieu votre événement ?")
-  * "Le nombre d'invités sera d'environ" (au lieu de "Combien d'invités ?")
-  * "Mon budget est de" (au lieu de "Quel est votre budget ?")
+Règles STRICTES pour les questions :
+- Maximum 10 questions pertinentes
+- Formule les questions comme des PHRASES avec des BLANCS (___)
+- Exemples PARFAITS à suivre :
+  * "Il y aura ___ personnes à mon événement"
+  * "Je prévois un budget de ___ €"
+  * "Mon événement aura lieu le ___"
+  * "La durée prévue sera de ___ heures"
+  * "Le style souhaité est ___"
+  * "L'âge moyen des invités sera de ___ ans"
+  * "Mon événement se déroulera ___" (lieu)
+- La phrase doit être NATURELLE et contenir ___ là où l'utilisateur doit répondre
 - Types appropriés (text, choice, number, date)
+- Possible d'avoir plusieurs options pour les questions à choix
 - Au moins 50% des questions doivent être required: true
 - Pour les questions à choix, fournis entre 3-6 options logiques et pertinentes
-- Adapte les questions au contexte (événement, projet, service, etc.)
+- Adapte les questions au contexte (mariage, anniversaire, entreprise, etc.), et prends en compte le ton et le style de l'événement, et le nombre de participants si mentionné.
+- Si le contexte n'est pas clair, pose des questions générales pour clarifier et préparer au mieux le résumé final.
 
 Retourne UNIQUEMENT le JSON, aucun autre texte.
 `;
@@ -86,21 +95,34 @@ Retourne UNIQUEMENT le JSON, aucun autre texte.
       questions: [
         {
           id: "context",
-          question: "Mon projet concerne",
+          question: "Mon projet concerne ___",
           type: "text",
+          required: true
+        },
+        {
+          id: "participants",
+          question: "Il y aura ___ personnes",
+          type: "number",
           required: true
         },
         {
           id: "timeline",
-          question: "Je souhaite que ce projet soit réalisé",
+          question: "Je souhaite que ce projet soit réalisé ___",
           type: "choice",
-          options: ["Dans la semaine", "Dans le mois", "Dans les 3 mois", "Sans urgence particulière"],
+          options: ["dans la semaine", "dans le mois", "dans les 3 mois", "sans urgence particulière"],
           required: true
         },
         {
           id: "budget",
-          question: "Mon budget approximatif est de",
+          question: "Je prévois un budget de ___ €",
           type: "text",
+          required: false
+        },
+        {
+          id: "style",
+          question: "L'ambiance souhaitée est ___",
+          type: "choice",
+          options: ["décontractée", "élégante", "festive", "professionnelle", "intime"],
           required: false
         }
       ]

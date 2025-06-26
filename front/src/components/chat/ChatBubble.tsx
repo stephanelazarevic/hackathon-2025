@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface ChatBubbleProps {
   message: string;
@@ -15,12 +16,20 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, role, isStreaming = fa
           className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm ${
             role === 'user' 
               ? 'bg-gray-900 text-white' 
-              : 'bg-blue-500 text-white'
+              : 'bg-white border border-gray-200 p-1'
           }`}
         >
-          <span>
-            {role === 'user' ? 'U' : 'E'}
-          </span>
+          {role === 'user' ? (
+            <span>U</span>
+          ) : (
+            <Image 
+              src="/img/ervia_small_logo.png" 
+              alt="Ervia Assistant" 
+              width={32} 
+              height={32} 
+              className="rounded-lg object-contain"
+            />
+          )}
         </div>
         
         {/* Message bubble */}

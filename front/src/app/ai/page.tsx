@@ -58,6 +58,7 @@ function AIAssistant() {
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [questionAnswerPairs, setQuestionAnswerPairs] = useState<QuestionAnswerPair[]>([]);
   const [originalUserRequest, setOriginalUserRequest] = useState<string>('');
+  const [additionalMessages, setAdditionalMessages] = useState<Message[]>([]); // Messages supplémentaires après questionnaire
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -99,10 +100,19 @@ function AIAssistant() {
 
         const result = await response.json();
         
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: result.response
-        }]);
+        // Sauvegarder les messages supplémentaires pour la génération du rapport
+        const userMessage: Message = { role: 'user', content: text };
+        const assistantMessage: Message = { role: 'assistant', content: result.response };
+        
+        const newAdditionalMessages = [...additionalMessages, userMessage, assistantMessage];
+        setAdditionalMessages(newAdditionalMessages);
+        
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        // Mettre à jour automatiquement le résumé avec les nouvelles informations
+        if (questionnaireData && questionAnswerPairs.length > 0) {
+          await updateSummaryWithAdditionalInfo(newAdditionalMessages);
+        }
         
       } else {
         // Première interaction ou nouvelle discussion - générer un questionnaire
@@ -151,19 +161,13 @@ function AIAssistant() {
 
   const convertToFillInTheBlank = (questionnaire: QuestionnaireData): FillInTheBlankQuestion[] => {
     return questionnaire.questions.map((q) => {
-      // Nettoyer la question et l'adapter au format phrase à trou
-      let questionText = q.question.replace(/[?!]/g, '').trim();
+      // Garder la question telle quelle avec les ___ déjà intégrés
+      let questionText = q.question.trim();
       
-      // S'assurer que la phrase se termine bien pour accueillir la réponse
-      if (!questionText.endsWith(':') && !questionText.endsWith(' ')) {
-        questionText += ' :';
-      } else if (questionText.endsWith(':')) {
-        // Garder les deux points
-      } else {
-        questionText += ' :';
+      // Si la question ne contient pas déjà des ___, l'ajouter à la fin
+      if (!questionText.includes('___')) {
+        questionText += ' ___';
       }
-      
-      questionText += ' ___________';
 
       switch (q.type) {
         case 'choice':
@@ -316,6 +320,7 @@ function AIAssistant() {
     setCurrentQuestionIndex(0);
     setUserAnswers({});
     setOriginalUserRequest('');
+    setAdditionalMessages([]); // Reset messages supplémentaires
   };
 
   const startNewDiscussion = () => {
@@ -330,6 +335,7 @@ function AIAssistant() {
     setLoading(false);
     setIsStreaming(false);
     setOriginalUserRequest('');
+    setAdditionalMessages([]); // Reset messages supplémentaires
   };
 
   const generateReport = () => {
@@ -351,12 +357,115 @@ function AIAssistant() {
     const reportData = {
       questionnaire: questionnaireData,
       answers,
-      userRequest: originalUserRequest
+      userRequest: originalUserRequest,
+      additionalMessages: additionalMessages // Inclure les messages supplémentaires
     };
 
     // Encoder les données et rediriger vers la page de rapport
     const encodedData = encodeURIComponent(JSON.stringify(reportData));
     window.open(`/report?data=${encodedData}`, '_blank');
+  };
+
+  const regenerateSummaryWithAdditionalInfo = async () => {
+    if (!questionnaireData || questionAnswerPairs.length === 0) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Construire les réponses pour l'API
+      const processedAnswers: Record<string, string> = {};
+      questionAnswerPairs.forEach(pair => {
+        const question = questionnaireData.questions.find(q => q.question === pair.question);
+        if (question) {
+          processedAnswers[question.id] = pair.answer;
+        }
+      });
+
+      const response = await fetch('/api/process-answers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionnaire: questionnaireData,
+          answers: processedAnswers,
+          additionalMessages: additionalMessages // Inclure les messages supplémentaires
+        })
+      });
+
+      if (!response.ok) throw new Error('Erreur lors de la régénération du résumé');
+
+      const result = await response.json();
+      
+      // Remplacer le dernier message de l'assistant par le nouveau résumé
+      setMessages(prev => {
+        const newMessages = [...prev];
+        // Trouver le dernier message de l'assistant (résumé)
+        for (let i = newMessages.length - 1; i >= 0; i--) {
+          if (newMessages[i].role === 'assistant' && 
+              (newMessages[i].content.includes('📋') || newMessages[i].content.includes('Analyse'))) {
+            newMessages[i] = {
+              role: 'assistant',
+              content: result.finalResponse
+            };
+            break;
+          }
+        }
+        return newMessages;
+      });
+      
+    } catch (error) {
+      console.error('Erreur lors de la régénération du résumé:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSummaryWithAdditionalInfo = async (newAdditionalMessages: Message[]) => {
+    if (!questionnaireData || questionAnswerPairs.length === 0) return;
+
+    try {
+      // Construire les données pour l'API process-answers
+      const answers: Record<string, string> = {};
+      questionAnswerPairs.forEach(pair => {
+        const question = questionnaireData.questions.find(q => q.question === pair.question);
+        if (question) {
+          answers[question.id] = pair.answer;
+        }
+      });
+
+      const response = await fetch('/api/process-answers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionnaire: questionnaireData,
+          answers,
+          additionalMessages: newAdditionalMessages
+        })
+      });
+
+      if (!response.ok) throw new Error('Erreur lors de la mise à jour du résumé');
+
+      const result = await response.json();
+      
+      // Mettre à jour le dernier message assistant dans la liste des messages
+      setMessages(prev => {
+        const lastIndex = prev.length - 1;
+        if (lastIndex >= 0 && prev[lastIndex].role === 'assistant') {
+          // Remplacer le dernier message assistant par le résumé mis à jour
+          const updatedMessages = [...prev];
+          updatedMessages[lastIndex] = {
+            ...updatedMessages[lastIndex],
+            content: result.finalResponse
+          };
+          return updatedMessages;
+        }
+        return prev;
+      });
+
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du résumé:', error);
+    }
   };
 
   useEffect(() => {
@@ -399,52 +508,54 @@ function AIAssistant() {
                 </div>
               </div>
 
-              {/* Question avec phrase à trou */}
+              {/* Question avec phrase à trou intégrée */}
               <div className="text-xl text-gray-800 mb-8 leading-relaxed font-medium">
-                {currentQuestion.text.split('___________').map((part, index) => (
-                  <span key={index}>
-                    {part}
-                    {index < currentQuestion.blanks.length && (
-                      <span className="inline-block mx-2 relative">
-                        {currentQuestion.blanks[index].type === 'choice' ? (
-                          <select
-                            className="px-6 py-3 border-2 border-blue-200 rounded-xl bg-blue-50 focus:outline-none focus:border-blue-500 focus:bg-white text-blue-700 font-semibold min-w-[250px] transition-all duration-200 cursor-pointer hover:border-blue-300"
-                            value={userAnswers[currentQuestion.blanks[index].id] || ''}
-                            onChange={(e) => handleBlankAnswer(currentQuestion.id, currentQuestion.blanks[index].id, e.target.value)}
-                          >
-                            <option value="" className="text-gray-400">{currentQuestion.blanks[index].placeholder}</option>
-                            {currentQuestion.blanks[index].options?.map((option, optIndex) => (
-                              <option key={optIndex} value={option} className="text-gray-700">{option}</option>
-                            ))}
-                          </select>
-                        ) : (
+                {currentQuestion.blanks[0].type === 'choice' ? (
+                  // Pour les choix multiples : afficher le texte puis les cartes
+                  <div>
+                    <p className="mb-6">{currentQuestion.text.replace('___', '')}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {currentQuestion.blanks[0].options?.map((option, optIndex) => (
+                        <div
+                          key={optIndex}
+                          onClick={() => handleBlankAnswer(currentQuestion.id, currentQuestion.blanks[0].id, option)}
+                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-center font-medium ${
+                            userAnswers[currentQuestion.blanks[0].id] === option
+                              ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md'
+                              : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                          }`}
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  // Pour les autres types : intégrer l'input dans le texte
+                  <div className="flex flex-wrap items-center gap-2">
+                    {currentQuestion.text.split('___').map((part, index) => (
+                      <span key={index} className="flex items-center">
+                        <span>{part}</span>
+                        {index < currentQuestion.blanks.length && (
                           <input
-                            type={currentQuestion.blanks[index].type === 'date' ? 'date' : currentQuestion.blanks[index].type === 'number' ? 'number' : 'text'}
-                            className="px-6 py-3 border-2 border-blue-200 rounded-xl bg-blue-50 focus:outline-none focus:border-blue-500 focus:bg-white text-blue-700 font-semibold min-w-[250px] transition-all duration-200 hover:border-blue-300"
+                            type={currentQuestion.blanks[index].type === 'date' ? 'date' : 
+                                  currentQuestion.blanks[index].type === 'number' ? 'number' : 'text'}
+                            className="mx-2 px-4 py-2 border-2 border-blue-200 rounded-lg bg-blue-50 focus:outline-none focus:border-blue-500 focus:bg-white text-blue-700 font-semibold min-w-[120px] transition-all duration-200 hover:border-blue-300"
                             placeholder={currentQuestion.blanks[index].placeholder}
                             value={userAnswers[currentQuestion.blanks[index].id] || ''}
                             onChange={(e) => handleBlankAnswer(currentQuestion.id, currentQuestion.blanks[index].id, e.target.value)}
                           />
                         )}
-                        {/* Indicateur requis */}
-                        {currentQuestionData?.required && (
-                          <span className="absolute -top-2 -right-2 text-red-500 text-lg">*</span>
-                        )}
                       </span>
-                    )}
-                  </span>
-                ))}
+                    ))}
+                  </div>
+                )}
+                
+                {/* Indicateur requis */}
+                {currentQuestionData?.required && (
+                  <p className="text-sm text-red-500 mt-2">* Cette information est requise</p>
+                )}
               </div>
-
-              {/* Message d'aide */}
-              {currentQuestionData?.required && !userAnswers[currentQuestion.blanks[0]?.id] && (
-                <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-amber-700 text-sm flex items-center">
-                    <span className="mr-2">⚠️</span>
-                    Cette information est requise pour continuer
-                  </p>
-                </div>
-              )}
 
               {/* Navigation */}
               <div className="flex justify-between items-center pt-6 border-t border-gray-100">
@@ -499,6 +610,8 @@ function AIAssistant() {
           onNewQuestionnaire={resetForNewQuestionnaire}
           onNewDiscussion={startNewDiscussion}
           onGenerateReport={generateReport}
+          onRegenerateSummary={additionalMessages.length > 0 ? regenerateSummaryWithAdditionalInfo : undefined}
+          hasAdditionalInfo={additionalMessages.length > 0}
         />
       </div>
     </div>
