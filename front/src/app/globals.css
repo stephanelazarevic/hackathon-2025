@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* Variables CSS pour cohérence */
+:root {
+  --ervia-white: #ffffff;
+  --ervia-gray: #bfbfbf;
+  --ervia-blue: #5f95ff;
+  --ervia-black: #000000;
+}
+
+/* Animations personnalisées */
+.animate-bounce-delay-1 {
+  animation: bounce 1s infinite;
+  animation-delay: 0.1s;
+}
+
+.animate-bounce-delay-2 {
+  animation: bounce 1s infinite;
+  animation-delay: 0.2s;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bfbfbf;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5f95ff;
+}
