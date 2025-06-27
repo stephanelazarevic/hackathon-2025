@@ -33,12 +33,13 @@ Ervia est un agent IA conçu pour assister les organisateurs d'événements dans
 
    ```bash
     # Variables d'environnement
-    NODE_ENV=
+    NODE_ENV=development
     MONGO_INITDB_ROOT_USERNAME=
     MONGO_INITDB_ROOT_PASSWORD=
     MONGO_INITDB_DATABASE=
     MONGODB_URI=
     API_DOCS_PATH=back/src/api/docs
+    OPENAI_API_KEY=
    ```
 
 3. **Démarrer les services**
