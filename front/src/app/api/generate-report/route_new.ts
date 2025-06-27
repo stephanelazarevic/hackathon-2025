@@ -13,7 +13,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POSTrequest: NextRequest) {
+export async function POS(request: NextRequest) {
   try {
     const { questionnaire, answers, userRequest } = await request.json();
 
